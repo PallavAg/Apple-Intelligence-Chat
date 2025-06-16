@@ -15,7 +15,6 @@ struct ContentView: View {
     // UI State
     @State private var messages: [ChatMessage] = []
     @State private var inputText: String = ""
-    @State private var isResponding = false
     @State private var showSettings = false
     @State private var showErrorAlert = false
     @State private var errorMessage = ""
@@ -43,7 +42,7 @@ struct ContentView: View {
                     ScrollView {
                         VStack {
                             ForEach(messages) { message in
-                                MessageView(message: message, isResponding: isResponding)
+                                MessageView(message: message, isResponding: isModelResponding)
                                     .id(message.id)
                             }
                         }
@@ -93,7 +92,7 @@ struct ContentView: View {
                 .textFieldStyle(.plain)
                 .lineLimit(1...5)
                 .frame(minHeight: 22)
-                .disabled(isResponding)
+                .disabled(isModelResponding)
                 .onSubmit {
                     if !inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                         handleSendOrStop()
@@ -104,12 +103,12 @@ struct ContentView: View {
             HStack {
                 Spacer()
                 Button(action: handleSendOrStop) {
-                    Image(systemName: isResponding ? "stop.circle.fill" : "arrow.up.circle.fill")
+                    Image(systemName: isModelResponding ? "stop.circle.fill" : "arrow.up.circle.fill")
                         .font(.system(size: 30, weight: .bold))
                         .foregroundStyle(isSendButtonDisabled ? Color.gray.opacity(0.6) : .primary)
                 }
                 .disabled(isSendButtonDisabled)
-                .animation(.easeInOut(duration: 0.2), value: isResponding)
+                .animation(.easeInOut(duration: 0.2), value: isModelResponding)
                 .animation(.easeInOut(duration: 0.2), value: isSendButtonDisabled)
                 .glassEffect(.regular.interactive())
                 .padding(.trailing, 8)
@@ -119,7 +118,7 @@ struct ContentView: View {
     }
     
     private var isSendButtonDisabled: Bool {
-        return inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !isResponding
+        return inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !isModelResponding
     }
     
     @ToolbarContentBuilder
@@ -152,7 +151,7 @@ struct ContentView: View {
     // MARK: - Model Interaction
     
     private func handleSendOrStop() {
-        if isResponding {
+        if isModelResponding {
             stopStreaming()
         } else {
             guard model.isAvailable else {
@@ -164,7 +163,6 @@ struct ContentView: View {
     }
     
     private func sendMessage() {
-        isResponding = true
         let userMessage = ChatMessage(role: .user, text: inputText)
         messages.append(userMessage)
         let prompt = inputText
@@ -179,7 +177,6 @@ struct ContentView: View {
                 
                 guard let currentSession = session else {
                     showError(message: "Session could not be created.")
-                    isResponding = false
                     return
                 }
                 
@@ -203,7 +200,6 @@ struct ContentView: View {
                 showError(message: "An error occurred: \(error.localizedDescription)")
             }
             
-            isResponding = false
             streamingTask = nil
         }
     }
@@ -253,8 +249,12 @@ struct ContentView: View {
     private func showError(message: String) {
         self.errorMessage = message
         self.showErrorAlert = true
-        self.isResponding = false
     }
+    
+    private var isModelResponding: Bool {
+        session?.isResponding ?? false
+    }
+
 }
 
 #Preview {
