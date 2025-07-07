@@ -43,7 +43,7 @@ struct MessageView: View {
                         PulsingDotView()
                             .frame(width: 60, height: 25)
                     } else {
-                        Text(message.text)
+                        Text(.init(message.text))
                             .textSelection(.enabled)
                     }
                 }
