@@ -103,16 +103,19 @@ struct ContentView: View {
             
             HStack {
                 Spacer()
+                
                 Button(action: handleSendOrStop) {
                     Image(systemName: isResponding ? "stop.circle.fill" : "arrow.up.circle.fill")
                         .font(.system(size: 30, weight: .bold))
                         .foregroundStyle(isSendButtonDisabled ? Color.gray.opacity(0.6) : .primary)
                 }
+                
                 .disabled(isSendButtonDisabled)
                 .animation(.easeInOut(duration: 0.2), value: isResponding)
                 .animation(.easeInOut(duration: 0.2), value: isSendButtonDisabled)
                 .glassEffect(.regular.interactive())
                 .padding(.trailing, 8)
+                .buttonStyle(.plain)
             }
         }
         .glassEffect(.regular.interactive())
