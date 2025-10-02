@@ -191,7 +191,7 @@ struct ContentView: View {
 #if os(iOS)
                         hapticStreamGenerator.selectionChanged()
 #endif
-                        updateLastMessage(with: partialResponse)
+                        updateLastMessage(with: partialResponse.content)
                     }
                 } else {
                     let response = try await currentSession.respond(to: prompt, options: options)
